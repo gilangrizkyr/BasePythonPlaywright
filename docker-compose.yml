@@ -1,0 +1,300 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # PLAYWRIGHT TEST RUNNER
+  # =============================================================================
+  playwright-runner:
+    build:
+      context: .
+      target: testing
+    container_name: playwright-runner
+    volumes:
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    environment:
+      - ENVIRONMENT=testing
+      - LOG_LEVEL=INFO
+      - HEADLESS=true
+      - PARALLEL_WORKERS=2
+      - BASE_URL=${BASE_URL:-https://example.com}
+    networks:
+      - playwright-network
+    depends_on:
+      - playwright-postgres
+      - playwright-redis
+    command: ["python", "-m", "pytest", "tests/", "--tb=short", "--junitxml=reports/junit-xml/results.xml"]
+
+  # =============================================================================
+  # PLAYWRIGHT DEVELOPMENT ENVIRONMENT
+  # =============================================================================
+  playwright-dev:
+    build:
+      context: .
+      target: development
+    container_name: playwright-dev
+    volumes:
+      - .:/app
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - HEADLESS=false
+      - PARALLEL_WORKERS=1
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+    networks:
+      - playwright-network
+    depends_on:
+      - playwright-postgres
+      - playwright-redis
+      - playwright-appium
+    command: ["tail", "-f", "/dev/null"]  # Keep container running
+
+  # =============================================================================
+  # DATABASE SERVICES
+  # =============================================================================
+
+  # PostgreSQL Database
+  playwright-postgres:
+    image: postgres:15-alpine
+    container_name: playwright-postgres
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - playwright-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d testdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  playwright-redis:
+    image: redis:7-alpine
+    container_name: playwright-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - playwright-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB Database
+  playwright-mongodb:
+    image: mongo:7-jammy
+    container_name: playwright-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: testdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - playwright-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # MOBILE TESTING SERVICES
+  # =============================================================================
+
+  # Appium Server for Mobile Testing
+  playwright-appium:
+    image: appium/appium:latest
+    container_name: playwright-appium
+    ports:
+      - "4723:4723"
+    environment:
+      - APPIUM_ARGS=--address 0.0.0.0 --port 4723 --log-level info
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - playwright-network
+    depends_on:
+      - playwright-android
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4723/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Android Emulator for Mobile Testing
+  playwright-android:
+    image: budtmo/docker-android-x86-11.0
+    container_name: playwright-android
+    privileged: true
+    ports:
+      - "6080:6080"  # VNC
+      - "5554:5554"  # ADB
+      - "5555:5555"  # ADB
+    environment:
+      - DEVICE=Samsung Galaxy S6
+      - APPIUM=true
+      - AUTO_UPDATE=true
+    volumes:
+      - android_data:/tmp/android-unknown
+    networks:
+      - playwright-network
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # =============================================================================
+  # MONITORING AND LOGGING SERVICES
+  # =============================================================================
+
+  # Grafana for Monitoring Dashboards
+  playwright-grafana:
+    image: grafana/grafana:latest
+    container_name: playwright-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - playwright-network
+    depends_on:
+      - playwright-prometheus
+
+  # Prometheus for Metrics Collection
+  playwright-prometheus:
+    image: prom/prometheus:latest
+    container_name: playwright-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - playwright-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # =============================================================================
+  # UTILITY SERVICES
+  # =============================================================================
+
+  # Selenium Grid Hub (for cross-browser testing)
+  playwright-selenium-hub:
+    image: selenium/hub:4.15.0
+    container_name: playwright-selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      - SE_EVENT_BUS_HOST=playwright-selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - playwright-network
+
+  # Selenium Chrome Node
+  playwright-selenium-chrome:
+    image: selenium/node-chrome:4.15.0
+    container_name: playwright-selenium-chrome
+    depends_on:
+      - playwright-selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=playwright-selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_HOST=playwright-selenium-chrome
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - playwright-network
+
+  # Selenium Firefox Node
+  playwright-selenium-firefox:
+    image: selenium/node-firefox:4.15.0
+    container_name: playwright-selenium-firefox
+    depends_on:
+      - playwright-selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=playwright-selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_HOST=playwright-selenium-firefox
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - playwright-network
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:
+  android_data:
+  grafana_data:
+  prometheus_data:
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  playwright-network:
+    driver: bridge
+
+# =============================================================================
+# USAGE EXAMPLES
+# =============================================================================
+
+# Run tests:
+# docker-compose up playwright-runner
+
+# Development environment:
+# docker-compose up playwright-dev
+
+# Full testing environment with all services:
+# docker-compose up -d
+
+# Stop all services:
+# docker-compose down
+
+# View logs:
+# docker-compose logs -f playwright-runner
+
+# Scale test runners:
+# docker-compose up --scale playwright-runner=3
+
+# Run specific test file:
+# docker-compose run --rm playwright-runner python -m pytest tests/test_login.py -v

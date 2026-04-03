@@ -1,0 +1,80 @@
+"""
+MANIFEST.in
+===========
+
+This file specifies additional files to include in the package distribution.
+"""
+
+# Include configuration files
+include .env.example
+include pytest.ini
+include requirements.txt
+
+# Include documentation
+include README.md
+include LICENSE
+include INSTALLATION_SUMMARY.md
+include QUICK_GUIDE.md
+include SETUP_COMPLETE.md
+
+# Include Docker files
+include Dockerfile
+include docker-compose.yml
+include docker/docker-compose.override.yml
+
+# Include CI/CD files
+include .github/workflows/*.yml
+include ci_cd/github_actions/*.yml
+
+# Include Kubernetes manifests
+include kubernetes/*.yml
+include kubernetes/*.yaml
+
+# Include Terraform files
+include terraform/*.tf
+include terraform/*.tfvars
+
+# Include monitoring configurations
+include monitoring/prometheus.yml
+include monitoring/grafana_dashboards/*.json
+
+# Include example files
+include examples/**/*.py
+include examples/**/*.json
+include examples/**/*.md
+
+# Include test data
+include test_data/**/*.json
+include test_data/**/*.csv
+
+# Include templates
+include templates/**/*.html
+include templates/**/*.json
+
+# Include scripts
+include scripts/**/*.sh
+include scripts/**/*.py
+include quick-start.sh
+
+# Exclude development files
+exclude .git*
+exclude .pytest_cache/
+exclude __pycache__/
+exclude *.pyc
+exclude .DS_Store
+exclude .vscode/
+exclude .idea/
+exclude venv/
+exclude .env
+exclude reports/
+exclude logs/
+exclude .coverage
+exclude htmlcov/
+exclude .mypy_cache/
+exclude .tox/
+
+# Global excludes
+global-exclude *.log
+global-exclude .git*
+global-exclude __pycache__/
+global-exclude *.pyc

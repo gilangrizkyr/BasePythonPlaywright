@@ -1,0 +1,295 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "playwright-automation-framework"
+version = "1.0.0"
+description = "Professional Python Playwright Automation Framework with Enterprise Features"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Professional Automation Team", email = "automation@company.com"},
+]
+maintainers = [
+    {name = "Professional Automation Team", email = "automation@company.com"},
+]
+keywords = [
+    "playwright",
+    "automation",
+    "testing",
+    "selenium",
+    "web-testing",
+    "e2e-testing",
+    "api-testing",
+    "performance-testing",
+    "accessibility-testing",
+    "visual-regression",
+    "ci-cd",
+    "pytest",
+    "async",
+    "enterprise",
+    "professional",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+]
+dependencies = [
+    "playwright>=1.40.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-html>=3.1.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-cov>=4.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "loguru>=0.6.0",
+    "faker>=15.0.0",
+    "aiohttp>=3.8.0",
+    "requests>=2.28.0",
+    "aiofiles>=0.8.0",
+    "pathlib>=1.0.1",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "isort>=5.10.0",
+    "mypy>=0.950",
+    "pre-commit>=2.17.0",
+    "pytest-cov>=3.0.0",
+    "pytest-xdist>=2.5.0",
+    "pytest-html>=3.1.0",
+    "pytest-asyncio>=0.18.0",
+    "pytest-playwright>=0.3.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-mock>=3.7.0",
+]
+docs = [
+    "sphinx>=4.5.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.17.0",
+]
+monitoring = [
+    "prometheus-client>=0.14.0",
+    "grafana-api>=1.0.3",
+    "influxdb-client>=1.28.0",
+]
+database = [
+    "psycopg2-binary>=2.9.0",
+    "pymongo>=4.1.0",
+    "redis>=4.3.0",
+    "sqlalchemy>=1.4.0",
+]
+mobile = [
+    "Appium-Python-Client>=2.7.0",
+    "selenium>=4.1.0",
+]
+cloud = [
+    "boto3>=1.24.0",
+    "azure-storage-blob>=12.13.0",
+    "google-cloud-storage>=2.4.0",
+]
+security = [
+    "bandit>=1.7.0",
+    "safety>=2.2.0",
+]
+visual = [
+    "Pillow>=9.0.0",
+    "opencv-python>=4.6.0",
+    "pixelmatch>=0.3.0",
+]
+api = [
+    "requests>=2.28.0",
+    "aiohttp>=3.8.0",
+    "httpx>=0.23.0",
+]
+all = [
+    # Include all optional dependencies
+]
+
+[project.urls]
+Homepage = "https://github.com/company/playwright-automation-framework"
+Documentation = "https://playwright-framework.readthedocs.io/"
+Repository = "https://github.com/company/playwright-automation-framework"
+Issues = "https://github.com/company/playwright-automation-framework/issues"
+Changelog = "https://github.com/company/playwright-automation-framework/blob/main/CHANGELOG.md"
+
+[project.scripts]
+playwright-framework = "core.runner:main"
+pf-run = "run_tests:main"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md", "*.yml", "*.yaml", "*.json", "*.html", "*.css", "*.js"]
+
+# Black configuration
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | node_modules
+  | \.pytest_cache
+  | __pycache__
+  | reports
+  | logs
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["core", "pages", "tests", "utils"]
+skip = ["venv", ".venv", "node_modules", ".tox"]
+
+# Flake8 configuration
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    ".venv",
+    "node_modules",
+    ".tox",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg",
+    "reports",
+    "logs",
+    ".pytest_cache",
+    ".mypy_cache",
+]
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "playwright.*",
+    "faker.*",
+    "loguru.*",
+    "aiohttp.*",
+    "pydantic.*",
+]
+ignore_missing_imports = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "smoke: Quick smoke tests",
+    "regression: Regression test suite",
+    "e2e: End-to-end tests",
+    "api: API tests",
+    "ui: UI tests",
+    "performance: Performance tests",
+    "accessibility: Accessibility tests",
+    "security: Security tests",
+    "mobile: Mobile tests",
+    "visual: Visual regression tests",
+    "slow: Slow running tests",
+    "flaky: Tests that may be unstable",
+    "skip_ci: Skip in CI environment",
+    "quarantine: Tests under investigation",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["core", "pages", "utils"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/__pycache__/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Bandit configuration
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv", "node_modules", ".tox", "build", "dist"]
+skips = ["B101", "B601"]  # Skip assert checks and shell usage
+
+# Safety configuration
+[tool.safety]
+ignore = [
+    "12345",  # Example vulnerability ID to ignore
+]

@@ -1,0 +1,7 @@
+[bandit]
+exclude_dirs = ["tests", "venv", ".venv", "node_modules", ".tox", "build", "dist", "reports", "logs", "__pycache__"]
+skips = ["B101", "B601", "B603", "B607"]  # Skip assert checks, shell usage, subprocess calls, and start_process_with_a_shell
+
+[tool:bandit]
+exclude_dirs = ["tests", "venv", ".venv", "node_modules", ".tox", "build", "dist", "reports", "logs", "__pycache__"]
+skips = ["B101", "B601", "B603", "B607"]
