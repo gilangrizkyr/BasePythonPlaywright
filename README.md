@@ -2,6 +2,8 @@
 
 A comprehensive, enterprise-grade Python Playwright automation framework with modern features, type safety, and production-ready capabilities.
 
+> 📚 **New to the framework?** Start with [DOCS_STRUCTURE.md](DOCS_STRUCTURE.md) for a complete guide on finding the right documentation for your needs.
+
 ## 🚀 Features
 
 ### Core Features
@@ -425,27 +427,27 @@ docker-compose up test-runner
 
 ## 🔄 CI/CD Integration
 
-### GitHub Actions
-```yaml
-name: Playwright Tests
-on: [push, pull_request]
+### GitHub Actions (Built-in)
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: playwright install
-      - run: python -m pytest tests/ --junitxml=reports/results.xml
-      - uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: reports/
+The framework includes a comprehensive GitHub Actions workflow. See [.github/workflows/tests.yml](.github/workflows/tests.yml) for full configuration.
+
+**Features:**
+- ✅ Automated testing on push/PR to main and develop branches
+- ✅ Multi-browser testing (Chromium, Firefox, WebKit)
+- ✅ Parallel test execution across browsers
+- ✅ Code coverage reporting with Codecov integration
+- ✅ Security scanning with Bandit
+- ✅ Code quality checks (Black, isort, flake8, mypy)
+- ✅ Performance benchmarking
+- ✅ Artifact collection (reports, screenshots, coverage)
+
+**Quick integration:**
+```bash
+# Just push to GitHub and the workflow runs automatically!
+git push origin main
 ```
+
+(For detailed setup, see [.github/workflows/tests.yml](.github/workflows/tests.yml))
 
 ### GitLab CI
 ```yaml
@@ -639,19 +641,26 @@ Ubah settings di `.env` file:
 
 ## Locators Management
 
-Manage semua locators dalam file `src/locators.py`:
+Manage semua locators within your page objects in `core/` atau `pages/`:
 
 ```python
-class LoginPageLocators:
+from core.base import BasePage
+
+class LoginPage(BasePage):
     USERNAME_INPUT = 'input[name="username"]'
     PASSWORD_INPUT = 'input[name="password"]'
     LOGIN_BUTTON = 'button:has-text("Login")'
+    
+    async def login(self, username: str, password: str):
+        await self.fill(self.USERNAME_INPUT, username)
+        await self.fill(self.PASSWORD_INPUT, password)
+        await self.click(self.LOGIN_BUTTON)
 ```
 
 ## Tips & Best Practices
 
 1. **Selalu gunakan async/await** dalam test methods
-2. **Organize locators** dalam class terpisah
+2. **Organize locators** dalam class page objects (using core/base.py)
 3. **Use Page Objects** untuk better maintainability
 4. **Add waits** untuk handle timing issues
 5. **Use fixtures** untuk setup dan cleanup

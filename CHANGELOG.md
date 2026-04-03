@@ -5,6 +5,61 @@ All notable changes to the Professional Playwright Automation Framework will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-03
+
+### Added
+- **GitHub Actions CI/CD Workflow** - Complete testing pipeline with multi-browser support
+  - Automated tests on push/PR to main and develop branches
+  - Multi-browser testing (Chromium, Firefox, WebKit)
+  - Code coverage reporting with Codecov integration
+  - Security scanning with Bandit
+  - Lint and type checking gates
+  - Performance benchmarking
+  
+- **Documentation Structure Guide** - New DOCS_STRUCTURE.md for navigation
+  - Clear hierarchy of documentation 
+  - Reading paths by role (Developer, QA, DevOps, Contributor)
+  - Quick lookup table for finding content
+  - Recommended learning path for new users
+
+- **Enhanced Dependencies**
+  - Added pyyaml==6.0.2 for YAML configuration support
+  - Better organization with categories (Core, Testing, Utilities, etc.)
+
+### Changed
+- **Consolidated codebase structure**
+  - Removed redundant src/ folder (all functionality in core/)
+  - Simplified import paths (all from core.*)
+  
+- **Cleaned up requirements.txt**
+  - Removed 80+ fake/duplicate pytest-playwright-* packages
+  - Kept only essential, real dependencies
+  - Added meaningful comments for each dependency group
+  - Pinned all versions for reproducibility
+  - Improved organization with categories
+  
+- **Improved Pydantic compatibility**
+  - Upgraded from pydantic==2.10.4 to pydantic==2.12.5
+  - Updated validators to use @field_validator syntax
+  - Fixed model validation with proper @model_validator decorator
+
+- **Documentation consolidation**
+  - Created DOCS_STRUCTURE.md as master index
+  - Clarified documentation hierarchy  
+  - Deprecated: INSTALLATION_SUMMARY.md, SETUP_COMPLETE.md, QUICK_GUIDE.md 
+    (content consolidated into main docs)
+
+### Fixed
+- Import consistency (eliminated core/ vs src/ confusion)
+- Removed non-existent PyPI packages from requirements
+- Documentation clarity and navigation
+
+### Technical Details
+- **Dependencies**: All 60+ dependencies now properly pinned and categorized
+- **CI/CD**: Full GitHub Actions workflow with 3 parallel jobs (test, lint, security)
+- **Python**: Still compatible with Python 3.12.11
+- **Browsers**: Supports Chromium 1.58.0, Firefox, WebKit
+
 ## [1.0.0] - 2024-01-15
 
 ### Added
